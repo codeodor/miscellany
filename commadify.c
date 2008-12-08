@@ -79,7 +79,7 @@ char* commadify(long num, char* result) {
 	}
 	
 	free(input_number);
-	return result; // + (16 - result_len); // move the pointer forward to cut off unused bytes
+	return result;
 }
 
 
