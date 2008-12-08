@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-char* commadify(long num);
-void benchmark(char* name, char* (*function)(long));
-static char* nice_num(long n);
+char* commadify(long num, char* result);
+void benchmark(char* name, char* (*function)(long, char* result));
+static char* nice_num(long n, char* useless);
 
 int main(int argc, char* argv[]) {
 	if (argc != 2){
@@ -13,29 +13,39 @@ int main(int argc, char* argv[]) {
 	}
 	
 	long num = atol(argv[1]);
-	printf( "commadify: %s\n", commadify(num) );
-	printf( "nice_num : %s", nice_num(num) );
+	
+	
+	char* result = malloc( 16 * sizeof(char) );
+	char* useless; 
+	
+	printf( "commadify: %s\n", commadify(num, result) );
+	printf( "nice_num : %s", nice_num(num, useless) );
 	printf("\n\n");
 	
 	benchmark("commadify", &commadify);
-	benchmark("nice_num", &nice_num);
+	benchmark("nice_num ", &nice_num);
+
+	free(result);
 
 	return 0;
 }
 
-void benchmark(char* name, char* (*function)(long)){
+void benchmark(char* name, char* (*function)(long, char*)){
 	clock_t start, end;
 	double elapsed;
 	int i;
 	
 	srand(clock());
 	
+	char* result = malloc( 16 * sizeof(char) );
+	
 	start = clock();
 	for(i=0; i<1000000; i++)
-		function(rand() * 65000);
+		function(rand() * 65000, result);
 	end = clock();
 	elapsed = elapsed = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("%s, 1M times: %f\n", name, elapsed);
+	free(result);
 } 
 
 int num_digits(long num) {
@@ -44,7 +54,7 @@ int num_digits(long num) {
 	return count+1;
 }
 
-char* commadify(long num) {
+char* commadify(long num, char* result) {
 	int input_len = num_digits(num);
 	char* input_number = malloc( input_len * sizeof(char) );
 	sprintf(input_number, "%ld", num);
@@ -52,7 +62,6 @@ char* commadify(long num) {
 	int number_of_commas = (input_len-1) / 3;
 	
 	int result_len = input_len + number_of_commas;
-	char* result = malloc( result_len * sizeof(char) );
 	
 	int input_index = input_len-1;
 	int result_index, count=0;
@@ -69,12 +78,13 @@ char* commadify(long num) {
 		count++;
 	}
 	
-	return result;
+	free(input_number);
+	return result; // + (16 - result_len); // move the pointer forward to cut off unused bytes
 }
 
 
 char prtbuf[12]; 
-static char *nice_num(long n)
+static char *nice_num(long n, char* useless)
 {
     int neg = 0, d = 3;
     char *buffer = prtbuf;
