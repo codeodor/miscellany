@@ -15,34 +15,6 @@ class SuffixArray
     @suffix_array.sort! { |a,b| a[:suffix] <=> b[:suffix] }
   end
   
-  def find_substring(the_substring, n_mismatches)
-      #uses typical binary search
-      high = @suffix_array.length - 1
-      low = 0
-      while(low <= high)
-        mid = (high + low) / 2
-        this_suffix = @suffix_array[mid][:suffix]
-        compare_len = the_substring.length-1
-        comparison = this_suffix[0..compare_len]
-
-        if n_mismatches == 0
-          within_n_mismatches = comparison == the_substring
-        else
-          within_n_mismatches = hamming_distance(the_substring, comparison) <= n_mismatches
-        end
-
-        return @suffix_array[mid][:position] if within_n_mismatches
-    
-        if comparison > the_substring
-          high = mid - 1
-        else
-          low = mid + 1
-        end
-      end
-      return nil
-  end
-  
-  
   def find_first_substring_index(the_substring, n_mismatches = 0) 
     #first one found, not necessarily first on in the string
     finder(the_substring, n_mismatches, true)
@@ -107,6 +79,5 @@ class SuffixArray
 end
   
 sa = SuffixArray.new("abracadabra")
-puts sa.find_substring("brd", 1) # outputs 8
 puts sa.find_first_substring_index("brd", 1) # outputs 8
 puts sa.find_all_substring_indices("brd", 1).inspect # outputs [8, 1]
